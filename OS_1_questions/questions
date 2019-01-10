@@ -1,0 +1,5 @@
+1. Study the basic file structure of unix/linux system.
+2. Write a shell script which takes two parameters, a file name and a number, script deletes the line with given number from the given line.
+3. Write a shell script which renames all the files in the current directory, to files with the same name but where the upper case characters are changed into lower case characters and vice-versa.
+4. Write a shell script to implement copy utility(cp command), script should take two parameters, src and dest path, if src file is not availible., display a alert massage to user.
+

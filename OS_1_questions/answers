@@ -1,0 +1,111 @@
+1. Study the basic file structure of unix/linux system.
+
+Ans: Unix file system is a logical method of organizing and storing large amounts of information in a way that makes it easy to manage. A file is a smallest unit in which the information is stored. Unix file system has several important features. All data in Unix is organized into files. All files are organized into directories. These directories are organized into a tree-like structure called the file system.
+Files in Unix System are organized into multi-level hierarchy structure known as a directory tree. At the very top of the file system is a directory called “root” which is represented by a “/”. All other files are “descendants” of root.
+Everything in Unix is considered to be a file, including physical devices such as DVD-ROMs, USB devices, and floppy drives.
+
+Unix filesystem is a collection of files and directories that has the following properties −
+
+1. / : The slash / character alone denotes the root of the filesystem tree.
+2. /bin : Stands for “binaries” and contains certain fundamental utilities, such as ls or cp, which are generally needed by all users.
+3. /boot : Contains all the files that are required for successful booting process.
+4. /dev : Stands for “devices”. Contains file representations of peripheral devices and pseudo-devices.
+5. /etc : Contains system-wide configuration files and system databases. Originally also contained “dangerous maintenance utilities” such as init,but these have typically been moved to /sbin or elsewhere.
+6. /home : Contains the home directories for the users.
+7. /lib : Contains system libraries, and some critical files such as kernel modules or device drivers.
+8. /media
+9. /mnt
+10. /proc
+11. /root
+12. /tmp
+13. /usr etc 
+
+Some basic commands are: 
+1 cat filename : Displays a filename
+2 cd dirname
+
+Moves you to the identified directory
+3 	
+cp file1 file2
+
+Copies one file/directory to the specified location
+4 	
+
+file filename
+
+Identifies the file type (binary, text, etc)
+5 	
+
+find filename dir
+
+Finds a file/directory
+6 	
+
+head filename
+
+Shows the beginning of a file
+7 	
+
+less filename
+
+Browses through a file from the end or the beginning
+8 	
+
+ls dirname
+
+Shows the contents of the directory specified
+9 	
+
+mkdir dirname
+
+Creates the specified directory
+10 	
+
+more filename
+
+Browses through a file from the beginning to the end
+11 	
+
+mv file1 file2
+
+Moves the location of, or renames a file/directory
+12 	
+
+pwd
+
+Shows the current directory the user is in
+13 	
+
+rm filename
+
+Removes a file
+14 	
+
+rmdir dirname
+
+Removes a directory
+15 	
+
+tail filename
+
+Shows the end of a file
+16 	
+
+touch filename
+
+Creates a blank file or modifies an existing file or its attributes
+17 	
+
+whereis filename
+
+Shows the location of a file
+18 	
+
+which filename
+
+Shows the location of a file if it is in your PATH
+
+
+
+
+2. 
