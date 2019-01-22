@@ -21,18 +21,18 @@ node * create()
    return NULL;
 }
 
-node * add(node * set, int key)
+void add(node ** set, int key)
 {
-    if (set == NULL)
+    if (*set == NULL)
     {
-        set = create_node(key);
-        return set;
+        *set = create_node(key);
+        return;
     }
 
     bool presence_flag = false;
     node * temp_root;
 
-    for (temp_root = set; temp_root != NULL; temp_root = temp_root -> next)
+    for (temp_root = *set; temp_root != NULL; temp_root = temp_root -> next)
     {
         if (temp_root -> key == key)
         {
@@ -45,10 +45,10 @@ node * add(node * set, int key)
     if (!presence_flag)
     {
         node * new_node = create_node(key);
-        new_node -> next = set;
-        set = new_node;
+        new_node -> next = *set;
+        *set = new_node;
     }
-    return set;
+    return;
 }
 
 void enumerate(node * set)
@@ -69,7 +69,7 @@ void enumerate(node * set)
         count ++;
     }
 
-    printf("\nTotal %d keys are present.", count);
+    printf("\nTotal keys present: %d", count);
     return;
 }
 
@@ -85,47 +85,54 @@ int size(node * set)
     return count;
 }
 
-node * removekey(node * set, int key)
+void removekey(node ** set, int key)
 {
-    node * temp_root = set; node * backward_pointer;
-    if (set != NULL && temp_root -> key == key)
+    node * temp_root = *set;
+    node * backward_pointer;
+
+    if (temp_root != NULL && temp_root -> key == key)
     {
-        set = temp_root -> next;
+        *set = temp_root -> next;
         free(temp_root);
-        return set;
+        return;
     }
-    while (temp_root != NULL || temp_root -> key != key)
+
+    while (temp_root != NULL && temp_root -> key != key)
     {
         backward_pointer = temp_root;
         temp_root = temp_root -> next;
     }
 
     if (temp_root == NULL)
+    {
         printf("\n%s", "Key not found in the given set.");
-        return set;
+        return;
+    }
 
     backward_pointer -> next = temp_root -> next;
     free(temp_root);
-    return set;
+    return;
 }
 
 int main()
 {
     printf("%s", "Output:");
     node * set1 = create();
-    set1 = add(set1, 5);
-    set1 = add(set1, 4);
-    set1 = add(set1, 7);
-    set1 = add(set1, 5);
-    set1 = add(set1, 7);
-    set1 = add(set1, 9);
-    set1 = add(set1, 4);
-    //printf("%d", size(set1));
+    add(&set1, 5);
+    add(&set1, 4);
+    add(&set1, 7);
+    add(&set1, 5);
+    add(&set1, 7);
+    add(&set1, 9);
+    add(&set1, 4);
+    printf("\nSize : %d", size(set1));
     enumerate(set1);
-    set1 = add(set1, 33);
-    set1 = add(set1, 27);
-    set1 = removekey(set1, 6);
-    set1 = removekey(set1, 27);
-    set1 = removekey(set1, 5);
+    add(&set1, 33);
+    add(&set1, 27);
+    enumerate(set1);
+    removekey(&set1, 6);
+    removekey(&set1, 27);
+    removekey(&set1, 7);
+    removekey(&set1, 5);
     enumerate(set1);
 }
