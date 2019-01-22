@@ -36,7 +36,6 @@ void add(node ** set, int key)
     {
         if (temp_root -> key == key)
         {
-            printf("\n%d is already present in the set.", key);
             presence_flag = true;
             break;
         }
@@ -121,17 +120,17 @@ bool is_empty(node * S)
     return false;
 }
 
-bool is_element_of(int key, node * set)
+int is_element_of(int key, node * set)
 {
     if (is_empty(set))
-        return false;
+        return 0;
     node * temp_root = set;
     while(temp_root -> key != key)
     {
         if (temp_root -> key == key)
-            return true;
+            return 1;
         if (temp_root -> next == NULL)
-            return false;
+            return 0;
         temp_root = temp_root -> next;
     }
 }
@@ -212,11 +211,62 @@ node * intersection(node * S, node * T)
                     add(&and_set, temp -> key);
             }
 
-            // Return union of two sets.
+            // Return intersection of two sets.
             return and_set;
     }
 }
 
+// Difference function: return the difference of sets S and T
+node * difference(node * S, node * T)
+{
+    // Return NULL if both the sets are empty.
+    if (is_empty(S) && is_empty(T))
+    {
+        printf("%s", "\nBoth the sets given for Intersection operation are empty.");
+        return NULL;
+    }
+
+    // If one of the set is empty return the other.
+    else if (is_empty(S))
+        return T;
+    else if (is_empty(T))
+        return S;
+    else
+    {
+            // Initiate set for Difference pointer.
+            node * diff_set = create();
+            for (node * temp = S; temp != NULL; temp = temp -> next)
+            {
+                // If present in S but not in T, insert the element.
+                if (!is_element_of(temp -> key, T))
+                    add(&diff_set, temp -> key);
+            }
+
+            for (node * temp = T; temp != NULL; temp = temp -> next)
+            {
+                // If present in T but not S, insert the element.
+                if (!is_element_of(temp -> key, S))
+                    add(&diff_set, temp -> key);
+            }
+
+            // Return difference of two sets.
+            return diff_set;
+    }
+}
+
+// Subset function: a predicate that tests whether the set S is a subset of set T
+int subset(node * S, node * T)
+{
+    // Traverse through subset to be checked
+    for (node * temp = S; temp -> next != NULL; temp = temp -> next)
+    {
+        // If element not present in set T return false/0.
+        if (!is_element_of(temp -> key, T))
+            return 0;
+    }
+    // If all elements of S are in T, then return True/1.
+    return 1;
+}
 
 int main()
 {
@@ -246,10 +296,14 @@ int main()
     int a[9] = {1, 3, 5, 8, 3, 6, 27, 89, 52};
     node * new_set = build(a, 9);
     enumerate(new_set);
-    int b[5] = {1, 5, 8, 2, 5};
-    node * new_set2 = build(b, 5);
+    int b[6] = {52, 5, 8, 2, 5, 1};
+    node * new_set2 = build(b, 6);
     enumerate(new_set2);
-    node * union_set = union_(new_set, new_set2);
-    enumerate(union_set);*/
-
+    enumerate(union_(new_set, new_set2));
+    enumerate(intersection(new_set, new_set2));
+    enumerate(difference(new_set, new_set2));*/
+    int a[] = {3, 5, 9, 6, 23442, 34958, 343};
+    int b[] = {5, 343, 6};
+    int c[] = {9, 5, 344, 6};
+    printf("\na subset b: %d\nb subset a: %d\nc subset a: %d", subset(build(a, 7), build(b, 3)), subset(build(b, 3), build(a, 7)), subset(build(c, 4), build(a, 7)));
 }
