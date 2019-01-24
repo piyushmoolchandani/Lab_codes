@@ -207,8 +207,7 @@ node * union_(node * S, node * T)
 
             for (node * temp = S; temp != NULL; temp = temp -> next)
             {
-                // If not already not present in the set, insert the element.
-                if (!is_element_of(temp -> key, or_set))
+                // Insert all the elements to the union set.
                     add(&or_set, temp -> key);
             }
 
