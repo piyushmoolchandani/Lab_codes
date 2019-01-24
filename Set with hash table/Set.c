@@ -97,16 +97,83 @@ int is_element_of(int x, node ** S, int n)
     return 0;
 }
 
+// size_list(set) function: returns the number of elements in list.
+int size_list(node * set)
+{
+    // If set is empty, return 0.
+    if (set == NULL)
+    {
+        return 0;
+    }
+    int count = 0;
+
+    // else return number of elements counted by traversing through the list.
+    for (node * temp_root = set; temp_root != NULL; temp_root = temp_root -> next)
+        count++;
+    return count;
+}
+
+// size(set) function: returns the number of elements in the whole set.
+int size(node ** set, int n)
+{
+    int count = 0;
+    for (int i = 0; i < n; i++)
+        count += size_list(set[i]);
+    return count;
+}
+
+// enumerate_list(set) function: prints all the elements of the list in some arbitrary order.
+void enumerate_list(node * set)
+{
+    node * temp_root = set;
+
+    // If set is empty, return.
+    if (temp_root == NULL)
+    {
+        return;
+    }
+
+    // print the elements
+    for (temp_root = set; temp_root != NULL; temp_root = temp_root -> next)
+    {
+        printf("\n%d", temp_root -> key);
+    }
+    return;
+}
+
+// enumerate(set) function: prints all the elements of the set in some arbitrary order.
+void enumerate(node ** set, int n)
+{
+    // if set is empty, return.
+    if (is_empty(set, n))
+    {
+        printf("%s", "\nSet is empty\n");
+        return;
+    }
+
+    // print the values one by one.
+    printf("%s", "\nElements in the set are: ");
+    for (int i = 0; i < n; i++)
+        enumerate_list(set[i]);
+    printf("\n");
+    return;
+}
+
 
 int main()
 {
     // Check for is_empty() and is_element_of()
     node ** set = create(10);
-    printf("%d\n", is_empty(set, 10));
-    printf("%d\n", is_element_of(5, set, 10));
-
+    printf("%d", is_empty(set, 10));
+    printf("\n%d", is_element_of(5, set, 10));
+    enumerate(set, 10);
     set[5] = create_node(5);
-    printf("%d\n", is_empty(set, 10));
-    printf("%d\n", is_element_of(5, set, 10));
+    printf("\n%d", is_empty(set, 10));
+    printf("\n%d", is_element_of(5, set, 10));
+    enumerate(set, 10);
+    // Check for count and enumerate
+    set[3] = create_node(9);
+    printf("\n%d", size(set, 10));
+    enumerate(set, 10);
 
 }
