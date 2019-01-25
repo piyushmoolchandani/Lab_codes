@@ -64,7 +64,7 @@ void add(node ** set, int key)
     return;
 }
 
-// enumerate(set) function: prints all the elements of the list in some arbitrary order.
+// enumerate(set) function: prints all the elements of the set in some arbitrary order.
 void enumerate(node * set)
 {
     node * temp_root = set;
@@ -207,7 +207,7 @@ node * union_(node * S, node * T)
 
             for (node * temp = S; temp != NULL; temp = temp -> next)
             {
-                // Insert all the elements to the union set.
+                // Insert all the elements.
                     add(&or_set, temp -> key);
             }
 
@@ -259,7 +259,7 @@ node * difference(node * S, node * T)
     // Return NULL if set S is empty.
     if (is_empty(S))
     {
-        printf("%s", "\nBoth the sets given for Intersection operation are empty.");
+        printf("%s", "\nFirst set given for difference operation are empty.");
         return NULL;
     }
 
@@ -302,6 +302,12 @@ int main()
     int a[] = {3, 5, 9, 6, 23442, 34958, 343};
     int b[] = {5, 343, 6};
     int c[] = {9, 5, 344, 6};
+    enumerate(build(a, 7));
+    enumerate(build(b, 3));
+    enumerate(build(c, 4));
+
+    enumerate(union_(build(a, 7), build(b, 3)));
+    enumerate(intersection(build(a, 7), build(b, 3)));
     enumerate(difference(build(a, 7), build(b, 3)));
     enumerate(difference(build(a, 7), build(c, 4)));
     enumerate(difference(build(b, 3), build(a, 7)));
