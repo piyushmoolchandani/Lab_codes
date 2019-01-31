@@ -1,5 +1,6 @@
 #include<stdio.h>
 #include<stdlib.h>
+#include<stdbool.h>
 
 // Create a structure that contains a key, and a pointer to left and right subtrees.
 typedef struct node
@@ -72,9 +73,31 @@ void postorder(node * root)
     printf("%d \n", root -> key);
 }
 
-// Question 1
+// Question 1.
+bool are_exactly_identical(node * tree1, node * tree2)
+{
+    if (tree1 == NULL && tree2 == NULL)
+        return true;
+    if (tree1 == NULL || tree2 == NULL)
+        return false;
+    
+    if (tree1 -> key == tree2 -> key)
+        return are_exactly_identical(tree1 -> left, tree2 -> left) && are_exactly_identical(tree1 -> right, tree2 -> right);
+    return false;
+}
 
-// Question 2
+// Question 2.
+bool are_structurally_identical(node * tree1, node * tree2)
+{
+    if (tree1 == NULL && tree2 == NULL)
+        return true;
+    if (tree1 == NULL || tree2 == NULL)
+        return false;
+
+    if (tree1 != NULL &&  tree2 != NULL)
+        return (are_structurally_identical(tree1 -> left, tree2 -> left) && are_structurally_identical(tree1 -> right, tree2 -> right));
+    return false;
+}
 
 // Question 3
 
@@ -162,14 +185,30 @@ void print_pattern(node * root)
 int main()
 {
     node * a = create();
-    a = insert(a, 6);
-    a = insert(a, 3);
     a = insert(a, 4);
+    a = insert(a, 2);
+    a = insert(a, 1);
+    a = insert(a, 3);
+    a = insert(a, 6);
+    a = insert(a, 5);
     a = insert(a, 7);
-    a = insert(a, 45);
-    a -> left -> right -> right  = create_node(5);
     inorder(a);
+
     printf("%d\n", distinct_bst(4));
-    //printf("%d\n", get_depth(a, 4));
+    printf("%d\n", get_depth(a, 4));
     printf("%d\n", check_bst(a));
+    print_pattern(a);
+
+    node * b = create();
+    b = insert(b, 4);
+    b = insert(b, 2);
+    b = insert(b, 1);
+    b = insert(b, 3);
+    b = insert(b, 6);
+    b = insert(b, 5);
+    b = insert(b, 9);
+    print_pattern(b);
+
+    printf("Exactly identical: %d\n", are_exactly_identical(a, b));
+    printf("Structurally identical: %d\n", are_structurally_identical(a, b));
 }
