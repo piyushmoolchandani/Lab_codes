@@ -73,7 +73,7 @@ void postorder(node * root)
     printf("%d \n", root -> key);
 }
 
-// Question 1.
+// Question 1. are_exactly_identical(tree1, tree2) function: checks whether two trees are exactly identical.
 bool are_exactly_identical(node * tree1, node * tree2)
 {
     if (tree1 == NULL && tree2 == NULL)
@@ -86,7 +86,7 @@ bool are_exactly_identical(node * tree1, node * tree2)
     return false;
 }
 
-// Question 2.
+// Question 2. are_structurally_identical(tree1, tree2) function : checks whether two trees are structurally identical.
 bool are_structurally_identical(node * tree1, node * tree2)
 {
     if (tree1 == NULL && tree2 == NULL)
@@ -99,7 +99,21 @@ bool are_structurally_identical(node * tree1, node * tree2)
     return false;
 }
 
-// Question 3
+// Question 3 mirror_bst(root) function: return a mirror image of the bst.
+node * mirror_bst(node * root)
+{
+    if (root == NULL)
+        return NULL;
+
+    root -> left = mirror_bst(root -> left);
+    root -> right = mirror_bst(root -> right);
+
+    node * temp = root -> left;
+    root -> left = root -> right;
+    root -> right = temp;
+
+    return root;
+}
 
 // Question 4(Part 1): Actual checking of whether a given tree is bst or not.
 int check_bst_real(node * root, node * left, node * right)
@@ -136,9 +150,57 @@ int distinct_bst(int N)
     return count;
 }
 
-// Question 6
+/* Question 6. path_sum(root, sum) function: checks whether there exist a path from root to any leaf node such that sum of elements along path is equal to sum argument passed. */
+bool path_sum(node * root, int sum)
+{
+    if ((sum - root -> key == 0) && (root -> left == NULL && root -> right == NULL))
+        return true;
 
-// Question 7
+    if (root -> left == NULL && root -> right == NULL)
+        return false;
+
+    sum -= root -> key;
+    return (path_sum(root -> left, sum) || path_sum(root -> right, sum));
+}
+
+// Question 7. Part 1: Implements path_to_leaf function.
+int path_to_leaf_implement(node * root, int path[], int count)
+{
+    if (root == NULL)
+        return 0;
+    if (root -> left == NULL && root -> right == NULL)
+    {
+        for (int i = 0; i < count; i++)
+            printf("%d | ", path[i]);
+        printf("%d\n", root -> key);
+        return 0;
+    }
+
+    int new_path[count + 1];
+    for (int i = 0; i < count; i++)
+    {
+        new_path[i] = path[i];
+    }
+
+    new_path[count] = root -> key;
+
+    if (root -> left != NULL)
+    {
+        path_to_leaf_implement(root -> left, new_path, count + 1);
+    }
+    if (root -> right != NULL)
+    {
+        path_to_leaf_implement(root -> right, new_path, count + 1);
+    }
+    return 0;
+}
+
+// Question 7. (Part 2): path_to_leaf function that prints path of each leaf node from root node.
+int path_to_leaf(node * root)
+{
+    int * path;
+    return path_to_leaf_implement(root, path, 0);
+}
 
 // Question 8. (Part - Get depth of a given node in tree).
 int get_depth(node * root, int key)
@@ -184,7 +246,7 @@ void print_pattern(node * root)
 
 int main()
 {
-    node * a = create();
+     node * a = create();
     a = insert(a, 4);
     a = insert(a, 2);
     a = insert(a, 1);
@@ -208,7 +270,14 @@ int main()
     b = insert(b, 5);
     b = insert(b, 9);
     print_pattern(b);
-
     printf("Exactly identical: %d\n", are_exactly_identical(a, b));
     printf("Structurally identical: %d\n", are_structurally_identical(a, b));
+    inorder(b);
+    b = mirror_bst(b);
+    inorder(b);
+    b = mirror_bst(b);
+    inorder(b);
+    print_pattern(b);
+    printf("For sum %d in tree a: %d\n", 15, path_sum(a, 15));
+    path_to_leaf(a);
 }
