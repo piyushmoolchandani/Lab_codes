@@ -35,6 +35,7 @@ int main(int argc, char *argv[])
 	{ 
 		// parent goes down this path (main)
 		int rc_wait = wait(NULL);
+		printf("%s", "Execution complete\n");
 	}
 	
 return 0;
