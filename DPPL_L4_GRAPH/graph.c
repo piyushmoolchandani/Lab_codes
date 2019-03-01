@@ -1,7 +1,6 @@
 #include<stdio.h>
 #include<stdlib.h>
-#define n 4
-
+#define n 8
 
 /** Queue ----------------------------------------------------------------------------------------------**/
 struct qnode
@@ -69,12 +68,19 @@ int deQueue(Queue *q)
 } 
 /** -------------------------------------------------------------------------------------------------------**/
 
+/** Stack -------------------------------------------------------------------------------------------------**/
+
+
+/** -------------------------------------------------------------------------------------------------------**/
+
+// function scan_arr(a): scans an array of size n
 void scan_arr(int a[])
 {
     for (int i = 0; i < n; i++)
         scanf("%d", &a[i]);
 }
 
+// function print_arr(a): prints an array of size n
 void print_arr(int a[])
 {
     for (int i = 0; i < n; i++)
@@ -82,6 +88,7 @@ void print_arr(int a[])
     printf("\n");
 }
 
+// function scan_mat(a): scans adjacency matrix of size n*n
 void scan_mat(int **a)
 {
     for (int i = 0; i < n; i++)
@@ -93,6 +100,7 @@ void scan_mat(int **a)
     }
 }
 
+// funtion print_mat(a): prints adjacency matrix of size n*n
 void print_mat(int **a)
 {
     for (int i = 0; i < n; i++)
@@ -105,6 +113,7 @@ void print_mat(int **a)
     }
 }
 
+// function create() : Allocates memory for adjacency matrix of size n*n
 int ** create()
 {
     int **mat = (int **)malloc(n * sizeof(int *));
@@ -114,6 +123,7 @@ int ** create()
     return mat;
 }
 
+// function find_index(var, m): finds index of var in array m
 int find_index(int var, int m[])
 {
     for (int i = 0; i < n; i++)
@@ -126,21 +136,28 @@ int find_index(int var, int m[])
     return -1;
 }
 
-void bfs(int a[], int ** adj, int index)
+// function bfs_connected(a, adj, index, visited): performs bfs for connected graph
+void bfs_connected(int a[], int ** adj, int index, int visited[])
 {
+    /** 
+     * Limitation:
+        More than one node with same key value can result in wrong bfs traversal because of use of find_index() function.
+    **/
+
+    // Create a queue, enqueue starting node and mark it as visited.
     Queue* p = create_Queue();
-    int visited[n] = {0};
     enQueue(p, a[index]);
+    visited[index] = 1;
+
+    // Run loop until queue is empty.
     while(!is_emptyq(p))
     {
+        // perform one dequeue and print the element.
         int temp = deQueue(p);
         int temp_index = find_index(temp, a);
-        if (visited[temp_index] == 1)
-            continue;
-
         printf("%d\t", temp);
-        visited[temp_index] = 1;
         
+        // Traverse through adjacency list and enqueue connected elements(only unvisited ones.)
         for (int i = 0; i < n; i++)
         {
             if (adj[temp_index][i] != 0)
@@ -148,8 +165,32 @@ void bfs(int a[], int ** adj, int index)
                 if (visited[i] != 1)
                 {
                     enQueue(p, a[i]);
+                    visited[i] = 1;
                 }
             }
+        }
+    }
+    printf("\n");
+}
+
+// function bfs(a, adj, index): performs bfs on any kind of graph
+void bfs(int a[], int **adj, int index)
+{
+    /** 
+     * Limitation:
+        More than one node with same key value can result in wrong bfs traversal.
+    **/
+    
+    // Create visited list and perform bfs using given node.
+    int visited[n] = {0};
+    bfs_connected(a, adj, index, visited);
+
+    // Perform bfs for remaining nodes.
+    for (int i = 0; i < n; i++)
+    {
+        if (visited[i] == 0)
+        {
+            bfs_connected(a, adj, i, visited);
         }
     }
 }
@@ -158,9 +199,12 @@ int main()
 {
     int arr[n];
     scan_arr(arr);
-    print_arr(arr);
     int ** mat = create();
     scan_mat(mat);
-    print_mat(mat);
-    bfs(arr, mat, 2);
+    int a = 8;
+    while(a--)
+    {
+        printf("\n");
+        bfs(arr, mat, a);
+    }
 }
