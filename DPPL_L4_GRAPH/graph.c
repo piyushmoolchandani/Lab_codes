@@ -214,13 +214,10 @@ void bfs_connected(int a[], int ** adj, int index, int visited[])
         // Traverse through adjacency list and enqueue connected elements(only unvisited ones.)
         for (int i = 0; i < n; i++)
         {
-            if (adj[temp_index][i] != 0)
+            if (adj[temp_index][i] != 0 && visited[i] != 1)
             {
-                if (visited[i] != 1)
-                {
                     enQueue(p, a[i]);
                     visited[i] = 1;
-                }
             }
         }
     }
@@ -252,11 +249,8 @@ void dfs_connected(int a[], int ** adj, int index, int visited[])
 
     for (int i = 0; i < n; i++)
     {
-        if (adj[index][i] == 1)
-        {
-            if (!visited[i])
+        if (adj[index][i] == 1 && !visited[i])
                 dfs_connected(a, adj, i, visited);
-        }
     }
 }
 
