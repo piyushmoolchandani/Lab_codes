@@ -11,7 +11,7 @@ struct qnode
 
 typedef struct qnode qnode;
 
-qnode * create_node (int key)
+qnode * create_qnode (int key)
 {
     qnode * temp = (qnode *)malloc(sizeof(qnode));
     temp -> key = key;
@@ -33,7 +33,7 @@ Queue *create_Queue()
   
 void enQueue(Queue *q, int k) 
 { 
-    qnode *temp = create_node(k); 
+    qnode *temp = create_qnode(k); 
    
     if (q->rear == NULL) 
     { 
@@ -69,8 +69,67 @@ int deQueue(Queue *q)
 /** -------------------------------------------------------------------------------------------------------**/
 
 /** Stack -------------------------------------------------------------------------------------------------**/
+struct node
+{
+    int key;
+    struct node * next;
+};
 
+typedef struct node node;
 
+node * create_stack()
+{
+    return NULL;
+}
+
+ node * create_node (int key)
+{
+    node * temp = (node *)malloc(sizeof(node));
+    temp -> key = key;
+    temp -> next = NULL;
+    return temp;
+}
+
+void push(node ** root, int key)
+{
+    if (*root == NULL)
+    {
+        * root = create_node(key);
+        return;
+    }
+
+    node * temp = create_node(key);
+    temp -> next = *root;
+    *root = temp;
+    return;
+}
+
+int is_empty(node * root)
+{
+    if (root == NULL)
+        return 1;
+    return 0;
+}
+
+void pop(node ** root)
+{
+    if (!is_empty(*root))
+    {
+        node * temp_node = *root;
+        *root = (*root) -> next;
+        free(temp_node);
+        return;
+    }
+}
+
+int top(node ** root)
+{
+    if (!is_empty(*root))
+    {
+        int temp = (*root) -> key;
+        return temp;
+    }
+}
 /** -------------------------------------------------------------------------------------------------------**/
 
 // function scan_arr(a): scans an array of size n
@@ -139,11 +198,6 @@ int find_index(int var, int m[])
 // function bfs_connected(a, adj, index, visited): performs bfs for connected graph
 void bfs_connected(int a[], int ** adj, int index, int visited[])
 {
-    /** 
-     * Limitation:
-        More than one node with same key value can result in wrong bfs traversal because of use of find_index() function.
-    **/
-
     // Create a queue, enqueue starting node and mark it as visited.
     Queue* p = create_Queue();
     enQueue(p, a[index]);
@@ -175,12 +229,7 @@ void bfs_connected(int a[], int ** adj, int index, int visited[])
 
 // function bfs(a, adj, index): performs bfs on any kind of graph
 void bfs(int a[], int **adj, int index)
-{
-    /** 
-     * Limitation:
-        More than one node with same key value can result in wrong bfs traversal.
-    **/
-    
+{   
     // Create visited list and perform bfs using given node.
     int visited[n] = {0};
     bfs_connected(a, adj, index, visited);
@@ -195,6 +244,41 @@ void bfs(int a[], int **adj, int index)
     }
 }
 
+// function dfs_connected(a, adj, index, visited): performs dfs for connected graph
+void dfs_connected(int a[], int ** adj, int index, int visited[])
+{
+	visited[index] = 1;
+    printf("%d\t", a[index]);
+
+    for (int i = 0; i < n; i++)
+    {
+        if (adj[index][i] == 1)
+        {
+            if (!visited[i])
+                dfs_connected(a, adj, i, visited);
+        }
+    }
+}
+
+void dfs(int a[], int ** adj, int index)
+{
+    // Create visited list and perform dfs using given node.
+    int visited[n] = {0};
+    dfs_connected(a, adj, index, visited);
+    printf("\n");
+
+    // Perform dfs for remaining nodes.
+    for (int i = 0; i < n; i++)
+    {
+        if (visited[i] == 0)
+        {
+            dfs_connected(a, adj, i, visited);
+            printf("\n");
+        }
+    }
+
+}
+
 int main()
 {
     int arr[n];
@@ -206,5 +290,6 @@ int main()
     {
         printf("\n");
         bfs(arr, mat, a);
+        dfs(arr, mat, a);
     }
 }
