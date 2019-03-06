@@ -303,6 +303,30 @@ int is_cyclic_undirected(graph * g)
     return 0;
 }
 
+int dfs_for_bipartite(graph * g, int v, int color[], int colour)
+{
+    color[v] = colour;
+    for (node * temp = g -> array[v].head; temp != NULL; temp = temp -> next)
+    {
+        if (color[temp -> destination] == colour)
+            return 0;
+        else if (!color[temp -> destination])
+            if (!dfs_for_bipartite(g, temp -> destination, color, (colour % 2) + 1))
+                return 0;
+    }
+    return 1;
+}
+
+int is_bipartite(graph * g)
+{
+    int v = g -> vertices;
+    int * color = create_visited(v);
+
+    if (dfs_for_bipartite(g, 0, color, 1))
+        return 1;
+    return 0;
+}
+
 int main()
 {
     graph * Graph = create_graph(6);
@@ -366,8 +390,8 @@ int main()
             }
             print_graph(g);
             printf("%d\n", is_cyclic_directed(g));
-            print_graph(g);
             printf("%d\n", is_cyclic_undirected(g));
+            printf("%d\n", is_bipartite(g));
             continue;
         }
         break;
