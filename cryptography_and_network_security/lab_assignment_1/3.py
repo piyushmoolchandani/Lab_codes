@@ -21,7 +21,7 @@ def extended_gcd(a, b):
         t2 = t
     return [r1, s1, t1]
 
-print("Enter numbers to find the gcd using Euclidean algorithm")
+print("Enter numbers to find the gcd using extended Euclidean algorithm")
 a = int(input("Enter first: "))
 b = int(input("Enter second: "))
 ans = extended_gcd(a, b);
