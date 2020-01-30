@@ -11,7 +11,8 @@ int flag = 0;
 %%
 
 int main(){
-printf("Enter the string: ");
+	extern FILE *yyin;
+	yyin = fopen("input_2.txt", "r");
 yylex();
 printf("Does any other character occurs: %d\n", flag);
 return 0;

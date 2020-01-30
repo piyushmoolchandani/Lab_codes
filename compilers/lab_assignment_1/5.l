@@ -4,12 +4,14 @@
 
 %%
 
-[a-z A-Z]+ {
+[a-zA-Z]+ {
     length = yyleng;
-    if (length >= 3 and length <= 5)
-        printf("%s ", yytext);
+    if (length >= 3 && length <= 5)
+        	puts(yytext);
+     else
+     		printf("");
 }
- 
+ \n {return;}
 %%
  
 // Function yywrap is called by lex when input is exhausted. 

@@ -1,14 +1,15 @@
 %{
     #include<string.h>
     int is_c_keyword(char * s);
+    char arr[50];
 %}
 
 %%
 
-[a-zA-Z]+ { if (is_c_keyword(yytext)) printf("%s: Keyword\n", yytext);}
-[a - z A - Z _][a - z A - Z 0 - 9 _]* {printf("%s: Identifier\n", yytext)};
-[^a-zA-Z_] {printf("%s: Neither keyword nor identifier\n");} 
+[a-zA-Z]+ { if (is_c_keyword(yytext)) printf("%s : Keyword\n", yytext);}
+[a - zA - Z_][a - zA - Z0 - 9_]* {printf("%s : Identifier\n", yytext);}
 \n {return;}
+. {};
 
 %%
 

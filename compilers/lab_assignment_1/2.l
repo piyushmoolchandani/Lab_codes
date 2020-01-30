@@ -22,7 +22,8 @@
 %%
 
 int main(){
-	printf("Enter the string: ");
+	extern FILE *yyin;
+	yyin = fopen("input_2.txt", "r");
 	yylex();
 	printf("Number of positive intergers : %d \nNumber of negative integers : %d\nNumber of positive fractions : %d\nNumber of negative fractions : %d\n", positive_count, negative_count, positive_fraction_count, negative_fraction_count);
 	return 0;
