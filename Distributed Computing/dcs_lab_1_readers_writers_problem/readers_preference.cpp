@@ -1,7 +1,8 @@
 #include<iostream>
-#include<thread>
+#include<pthread.h>
 #include<fstream>
 #include<semaphore.h>
+#include<unistd.h>
 
 using namespace std;
 
@@ -10,32 +11,37 @@ sem_t reader_reader_lock;
 int reader_count;
 int temp = 900;
 
-void * reader();
-void * writer();
+void *reader(void * args);
+void *writer(void * args);
 
 int main(){
 	
-	cout << "Readers preference problem." << endl;
-	cout << "Please enter number of readers: " << endl;
-	cin >> reader_count;
+	int rc, wc;
+	cin >> rc >> wc;
 	
 	sem_init(&reader_writer_lock, 0, 1);
 	sem_init(&reader_reader_lock, 0, 1);
-	pthread_t writer;
-	pthread_t readers[reader_count];
+	pthread_t writers[wc];
+	pthread_t readers[rc];
 	
-	pthread_create(&writer, NULL, writer, NULL);
-	for (int i = 0; i < reader_count; i++){
+	for (int i = 0; i < wc; i++){
+		pthread_create(&writers[i], NULL, writer, NULL);
+	}
+	for (int i = 0; i < rc; i++){
 		pthread_create(&readers[i], NULL, reader, NULL);
 	}
-	pthread_join(writer, NULL);
-	for (int i = 0; i < reader_count; i++){
+
+	
+	for (int i = 0; i < wc; i++){
+		pthread_join(writers[i], NULL);
+	}
+	for (int i = 0; i < rc; i++){
 		pthread_join(readers[i], NULL);
 	}
 	return 0;
 }
 
-void * reader(){
+void *reader(void * args){
 	/*
 	ifstream fin;
 	fin.open("text_data.txt");
@@ -57,12 +63,14 @@ void * reader(){
 	if (reader_count == 0){
 		sem_post(&reader_writer_lock);
 	}
-	sem_wait(&reader_reader_lock);
+	sem_post(&reader_reader_lock);
+	return NULL;
 }
 
-void * writer(){
+void *writer(void * args){
 	sem_wait(&reader_writer_lock);
 	temp -= 1;
-	puts(temp);
+	cout << temp << endl;
 	sem_post(&reader_writer_lock);
+	return NULL;
 }
