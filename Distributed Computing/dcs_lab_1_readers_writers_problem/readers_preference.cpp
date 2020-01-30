@@ -2,6 +2,7 @@
 #include<pthread.h>
 #include<fstream>
 #include<semaphore.h>
+#include<time.h>
 #include<unistd.h>
 
 using namespace std;
@@ -9,7 +10,7 @@ using namespace std;
 sem_t reader_writer_lock;
 sem_t reader_reader_lock;
 int reader_count;
-int temp = 900;
+int char_generator = 100;
 
 void *reader(void * args);
 void *writer(void * args);
@@ -54,8 +55,16 @@ void *reader(void * args){
 	}
 	sem_post(&reader_reader_lock);
 	
-	cout << temp << endl;
-	
+	sleep(.1);
+	cout << "\nReader";
+	ifstream fi;
+	string line;
+	fi.open("data.txt", ios :: in);
+	while(fi){
+		getline(fi, line);
+		cout << line << endl;
+	}
+	fi.close();
 	
 	sem_wait(&reader_reader_lock);
 	reader_count--;
@@ -68,8 +77,18 @@ void *reader(void * args){
 
 void *writer(void * args){
 	sem_wait(&reader_writer_lock);
-	temp -= 1;
-	cout << temp << endl;
+	
+	sleep(.1);
+	cout << "\nWriter";
+	ofstream fo;
+	fo.open("data.txt", ios :: out);
+	if (fo) {
+		char_generator += 1;
+		char temp_c = char_generator;
+		fo << temp_c << " ";
+	}
+	fo.close();
+	
 	sem_post(&reader_writer_lock);
 	return NULL;
 }
