@@ -16,6 +16,7 @@ void *writer(void * args);
 
 int main(){
 	
+	cout << "Enter number of readers and writers respectively: ";
 	int rc, wc;
 	cin >> rc >> wc;
 	
@@ -24,19 +25,16 @@ int main(){
 	pthread_t writers[wc];
 	pthread_t readers[rc];
 	
-	for (int i = 0; i < wc; i++){
-		pthread_create(&writers[i], NULL, writer, NULL);
-	}
 	for (int i = 0; i < rc; i++){
+		pthread_create(&writers[i], NULL, writer, NULL);
 		pthread_create(&readers[i], NULL, reader, NULL);
 	}
-
 	
-	for (int i = 0; i < wc; i++){
-		pthread_join(writers[i], NULL);
-	}
 	for (int i = 0; i < rc; i++){
 		pthread_join(readers[i], NULL);
+	}
+	for (int i = 0; i < wc; i++){
+		pthread_join(writers[i], NULL);
 	}
 	return 0;
 }
@@ -57,6 +55,7 @@ void *reader(void * args){
 	sem_post(&reader_reader_lock);
 	
 	cout << temp << endl;
+	
 	
 	sem_wait(&reader_reader_lock);
 	reader_count--;
