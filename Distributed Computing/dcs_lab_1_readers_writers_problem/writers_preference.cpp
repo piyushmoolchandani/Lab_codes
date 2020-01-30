@@ -21,14 +21,13 @@ void * reader(void * args){
 	sem_post(&reader_lock);
 	sem_post(&reader_writer_lock);
 	
-	sleep(.1);
-	cout << "\nReader";
+	cout << "\nReader : ";
 	ifstream fi;
 	string line;
 	fi.open("data.txt", ios :: in);
 	while(fi){
 		getline(fi, line);
-		cout << line << endl;
+		cout << line << ' ';
 	}
 	fi.close();
 	
@@ -49,7 +48,6 @@ void * writer(void * args){
 	sem_post(&writer_lock);
 	
 	sem_wait(&resource_lock);
-	sleep(.1);
 	cout << "\nWriter";
 	ofstream fo;
 	fo.open("data.txt", ios :: out);
