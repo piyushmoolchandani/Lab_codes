@@ -12,7 +12,7 @@
 
 %%
 
-int is_c_keyword(char* str) 
+int is_c_keyword(char* str)
 { 
     if (!strcmp(str, "if") || !strcmp(str, "else") || !strcmp(str, "auto") || !strcmp(str, "const") 
         || !strcmp(str, "while") || !strcmp(str, "do") ||  !strcmp(str, "for") || !strcmp(str, "signed")
