@@ -12,7 +12,7 @@ int reader_count = 0, writer_count = 0;
 int char_generator = 100;
 
 void * reader(void * args){
-	
+
 	sem_wait(&reader_writer_lock);
 	sem_wait(&reader_lock);
 	reader_count++;
@@ -20,7 +20,7 @@ void * reader(void * args){
 		sem_wait(&resource_lock);
 	sem_post(&reader_lock);
 	sem_post(&reader_writer_lock);
-	
+
 	cout << "\nReader : ";
 	ifstream fi;
 	string line;
@@ -30,7 +30,7 @@ void * reader(void * args){
 		cout << line << ' ';
 	}
 	fi.close();
-	
+
 	sem_wait(&reader_lock);
 	reader_count--;
 	if (reader_count == 0)
@@ -46,9 +46,8 @@ void * writer(void * args){
 	if (writer_count == 1)
 		sem_post(&reader_writer_lock);
 	sem_post(&writer_lock);
-	
+
 	sem_wait(&resource_lock);
-	cout << "\nWriter";
 	ofstream fo;
 	fo.open("data.txt", ios :: out);
 	if (fo) {
@@ -72,17 +71,19 @@ int main(){
 	cout << "Enter number of readers and writers respectively: ";
 	int rc, wc;
 	cin >> rc >> wc;
-	
+
 	sem_init(&reader_writer_lock, 0, 1);
 	sem_init(&reader_lock, 0, 1);
 	sem_init(&writer_lock, 0, 1);
 	sem_init(&resource_lock, 0, 1);
 	pthread_t writers[wc];
 	pthread_t readers[rc];
-	
+
 	for (int i = 0; i < rc; i++){
 		pthread_create(&writers[i], NULL, writer, NULL);
-		pthread_create(&readers[i], NULL, reader, NULL);
+	}
+	for (int i = 0; i < rc; i++){
+        pthread_create(&readers[i], NULL, reader, NULL);
 	}
 
 	for (int i = 0; i < wc; i++){
@@ -92,5 +93,4 @@ int main(){
 		pthread_join(readers[i], NULL);
 	}
 	return 0;
-
 }
