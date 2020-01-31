@@ -11,6 +11,7 @@
      else
      		printf("");
 }
+. {}
  \n {return;}
 %%
  
