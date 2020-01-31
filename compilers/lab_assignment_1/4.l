@@ -6,8 +6,7 @@
 
 %%
 
-[a-zA-Z]+ { if (is_c_keyword(yytext)) printf("%s : Keyword\n", yytext);}
-[a - zA - Z_][a - zA - Z0 - 9_]* {printf("%s : Identifier\n", yytext);}
+[a-zA-Z_][a-zA-Z0-9_]* {if (is_c_keyword(yytext)) printf("%s : Keyword\n", yytext); else printf("%s : Identifier\n", yytext);}
 \n {return;}
 . {};
 
