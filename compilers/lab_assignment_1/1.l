@@ -4,13 +4,15 @@
 %}
 
 %%
+
+[\\][a-zA-Z] {;}
 [aeiouAEIOU] {vowel_count++;}
 [a-zA-Z] {consonent_count++;}
-\n {return;} 
-. {};
+. {;}
+
 %%
 
-int yywrap(){	
+int yywrap(){
 }
 
 int main(){
