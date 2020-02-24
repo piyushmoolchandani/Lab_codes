@@ -5,8 +5,6 @@
 	void copy_string(char * destination, char * source);
 	
 	char * temp;
-	int flag;
-	int brackets;
 	
 	typedef struct loop_data{
 		char * condition;
@@ -28,30 +26,57 @@
 %}
 
 for for
+while while
 
 %%
 
-[^\n\t ;]*{for} {
+[/]{2}.* {fprintf(yyout, "%s", yytext);}
+
+["].*["] {fprintf(yyout,"%s",yytext);}
+
+for[ \t\n]*[(] {
+	yyless(yyleng - 1);
 	printf("0 %s\n", yytext);
 	push(&root, " ", 1);
 }
 
-[(][^;\n)]* {
-	//printf("%s", "yo bro 1\n");
-	if (read_flag(root) == 1){
+do[ \t\n]*[{] {
+	yyless(yyleng - 1);
+	printf("11 %s\n", yytext);
+	push(&root, " ", 11);
+	fprintf(yyout, "%s", "while( 1 )");
+}
+
+[(][^;]* {
+	if (read_flag(root) == 12){
+		printf("13 %s\n", yytext);
+		fprintf(yyout, "if (!%s) {break; }\n}", yytext);
+		pop(&root);
+	}
+	else if (read_flag(root) == 1){
 		printf("1 %s\n", yytext);
 		substring(yytext, temp, 1, strlen(yytext) - 1);
 		update(&root, temp, 2, read_brackets(root));
 		fprintf(yyout, "{%s;\n", temp);
 	}
 	else{
-		printf("-1 %s\n", yytext);
-		fprintf(yyout, "%s", yytext);
+		REJECT;
 	}
 }
 
-[;][^;)\n]* {
+[;][^)]* {
 	//printf("%s", "yo bro 2\n");
+	if (read_flag(root) == 3){
+		printf("3 %s\n", yytext);
+		substring(yytext, temp, 1, strlen(yytext) - 1);
+		update(&root, temp, 4, read_brackets(root));
+	}
+	else{
+		REJECT;
+	}
+}
+
+[;][^;]* {
 	if (read_flag(root) == 2){
 		printf("2 %s\n", yytext);
 		if (yyleng == 1){
@@ -64,27 +89,36 @@ for for
 			fprintf(yyout, "%s%s ", "while(", temp);
 		}
 	}
-	else if (read_flag(root) == 3){
-		printf("3 %s\n", yytext);
-		substring(yytext, temp, 1, strlen(yytext) - 1);
-		update(&root, temp, 4, read_brackets(root));
-	}
 	else{
-		printf("-23 %s\n", yytext);
-		fprintf(yyout, "%s", yytext);
+		REJECT;
 	}
 }
 
 [{] {
 	update(&root, read_condition(root), read_flag(root), read_brackets(root) + 1);
+	printf("%s %d\n", yytext, read_brackets(root));
 	fprintf(yyout, "%s", yytext);
+}
+
+[}][ \t\n]*{while} {
+	update(&root, read_condition(root), read_flag(root), read_brackets(root) - 1);
+	printf("%s %d\n", yytext, read_brackets(root));
+	if (read_flag(root) == 11 && !read_brackets(root)){
+		printf("12 %s\n", yytext);
+		update(&root, read_condition(root), 12, read_brackets(root));
+	}
+	else{
+		update(&root, read_condition(root), read_flag(root), read_brackets(root) + 1);
+		REJECT;
+	}
 }
 
 [}] {
 	update(&root, read_condition(root), read_flag(root), read_brackets(root) - 1);
+	printf("%s %d\n", yytext, read_brackets(root));
 	if (read_flag(root) == 4 && !read_brackets(root)){
 		printf("5 %s\n", yytext);
-		fprintf(yyout, "%s;\n}}", read_condition(root));
+		fprintf(yyout, "%s;\n}\n}", read_condition(root));
 		pop(&root);
 	}
 	else{
