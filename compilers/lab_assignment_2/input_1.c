@@ -15,6 +15,9 @@ int main(){
 			while(2 > 9){
 				continue;
 			}
+			do {
+				printf("Hello\n");
+			} while(3 > 7);
 		}
 		printf("\n");
 	}
