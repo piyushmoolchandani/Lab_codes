@@ -16,8 +16,8 @@
 using namespace std;
 
 #define N 3
-#define request 1
-#define reply 2
+#define REQUEST 1
+#define REPLY 2
 
 #define message_type_idx 0
 #define timestamp_idx 1
@@ -26,6 +26,7 @@ using namespace std;
 
 #define size_request_buffer 12
 #define size_reply_buffer 2
+#define max_message_size 12
 
 
 mutex array_lock, queue_lock;
@@ -34,12 +35,15 @@ int my_id;
 int port;
 time_t timestamp;
 time_t current_time;
-std::queue < pair<int, int> > pending_requests;
+std::queue < pair<int, struct sockaddr_in> > pending_requests;
 bool * reply_received = new bool[N];
 bool cse_query_live = true;
 std::vector < pair<int, int> > dependent_nodes;
 
-void check_and_act(int sockfd){
+int sockfd;
+struct sockaddr_in servaddr;
+
+void check_and_act(){
 
 	cout << "Thread check and act activated." << endl;
 	while(1){
@@ -57,10 +61,8 @@ void check_and_act(int sockfd){
 		}
 		
 		if (not done){
-			
 			// release lock for array
 			array_lock.unlock();
-			
 		}
 		else{
 			
@@ -74,11 +76,19 @@ void check_and_act(int sockfd){
 			cout << "Entered critical section for requested generated with timestamp: " << timestamp << endl;
 			
 			for (int i = 0; i < N; i++)
-				reply_received[i] = 0;
+				reply_received[i] = false;
 				
 			// send reply to all nodes in queue
+			while(not pending_requests.empty()){
 			
-			// give some wait or sleep time
+				pair <int, struct sockaddr_in> temp = pending_requests.front();
+				pending_requests.pop();
+				string reply_str = to_string(REPLY * 10 + my_id);
+				char * reply = new char[size_reply_buffer + 1];
+				reply_str.copy(reply, size_reply_buffer, 0);
+				
+				sendto(sockfd, (const char *)reply, strlen(reply), MSG_CONFIRM, (const struct sockaddr *) &(temp.second), sizeof(temp.second));
+			}	
 			
 			time(&current_time);
 			cout << current_time << ": critical section exit time" << endl;
@@ -94,50 +104,76 @@ void check_and_act(int sockfd){
 			sleep(1);
 			
 			// new critical section entry 
+			time(&timestamp);
 			
 			// send timestamp, my_id and request to all dependent nodes
+			for (int i = 0; i < N - 1; i++){
+				pair <int, int> temp = dependent_nodes[i];
+				struct sockaddr_in dependent_addr;
+				memset(&dependent_addr, 0, sizeof(dependent_addr));
+				
+				dependent_addr.sin_family = AF_INET;
+				dependent_addr.sin_port = htons(temp.second);
+				dependent_addr.sin_addr.s_addr = INADDR_ANY;
+				
+				char * request = new char[size_request_buffer + 1];
+				string request_str = to_string(REQUEST);
+				request_str.append(to_string(timestamp));
+				request_str.append(to_string(my_id));
+				request_str.copy(request, size_request_buffer, 0);
+				
+				sendto(sockfd, (const char *)request, strlen(request), MSG_CONFIRM, (const struct sockaddr *) &dependent_addr, sizeof(dependent_addr));
+			}
 		}
 	}
 }
 			
-void message_handler(int sockfd){
+void message_handler(){
 	
 	cout << "Thread message handler activated." << endl;
-	int message;
 	
-	// receive message and convert to int
+	struct sockaddr_in sender_addr;
+	memset(&sender_addr, 0, sizeof(sender_addr));
+	char buffer[max_message_size];
 	
-	if (message == request){
+	while (true){
+		int message;
+		int n;
 		
-		time_t foreign_timestamp;
-		int foreign_id;
+		n = recvfrom(sockfd, (char *)buffer, max_message_size, MSG_WAITALL, (struct sockaddr *)&sender_addr, sizeof(sender_addr));
 		
-		// retrieve timestamp and id
-		
-		if (foreign_timestamp > timestamp){
+		if (message == REQUEST){
 			
-			// acquire lock for queue
-			queue_lock.lock();
+			time_t foreign_timestamp;
+			int foreign_id;
 			
-			//pending_requests.push(foreign_id);
+			// retrieve timestamp and id
 			
-			// release lock for queue
-			queue_lock.unlock();
+			if (foreign_timestamp > timestamp){
+				
+				// acquire lock for queue
+				queue_lock.lock();
+				
+				//pending_requests.push(foreign_id);
+				
+				// release lock for queue
+				queue_lock.unlock();
+			}
 		}
-	}
-	
-	else if (message == reply){
 		
-		int foreign_id;
-		// retrieve id
-		
-		// acquire lock for array
-		array_lock.lock();
-		
-		reply_received[foreign_id] = 1;
-		
-		// release lock for array
-		array_lock.unlock();
+		else if (message == REPLY){
+			
+			int foreign_id;
+			// retrieve id
+			
+			// acquire lock for array
+			array_lock.lock();
+			
+			reply_received[foreign_id] = 1;
+			
+			// release lock for array
+			array_lock.unlock();
+		}
 	}
 }
 
@@ -158,12 +194,8 @@ int main(int argc, char ** argv){
 	for (int i = 0; i < N; i++){
 		if (i != my_id)
 			dependent_nodes.push_back(make_pair(i, atoi(argv[i + 2])));
+		reply_received[i] = false;
 	}
-	
-	// Work going on below
-	
-	int sockfd;
-	struct sockaddr_in servaddr;
 	
 	if ((sockfd = socket(AF_INET, SOCK_DGRAM, 0)) < 0){
 		cout << "Socket creating failed" << endl;
@@ -185,8 +217,8 @@ int main(int argc, char ** argv){
 	
 	cout << "Bind successful" << endl;
 	
-	thread t_message_handler(&message_handler, sockfd);
-	thread t_check_and_act(&check_and_act, sockfd);
+	thread t_message_handler(&message_handler);
+	thread t_check_and_act(&check_and_act);
 	
 	t_message_handler.join();
 	t_check_and_act.join();
