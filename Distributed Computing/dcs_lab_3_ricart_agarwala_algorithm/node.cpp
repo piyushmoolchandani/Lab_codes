@@ -23,6 +23,7 @@ using namespace std;
 #define timestamp_idx 1
 #define request_id_idx 11
 #define reply_id_idx 1
+#define timestamp_size 10
 
 #define size_request_buffer 12
 #define size_reply_buffer 2
@@ -31,6 +32,7 @@ using namespace std;
 
 mutex array_lock, queue_lock;
 
+int sleep_time;
 int my_id;
 int port;
 time_t timestamp;
@@ -43,9 +45,40 @@ std::vector < pair<int, int> > dependent_nodes;
 int sockfd;
 struct sockaddr_in servaddr;
 
+string convertToString(char* a, int size) 
+{ 
+    string s(a);
+    return s; 
+} 
+
 void check_and_act(){
 
-	cout << "Thread check and act activated." << endl;
+	cout << "Thread check_and_act activated." << endl;
+	
+	sleep(sleep_time);
+	
+	time(&timestamp);
+	
+	// send timestamp, my_id and request to all dependent nodes
+	for (int i = 0; i < N - 1; i++){
+		pair <int, int> temp = dependent_nodes[i];
+		struct sockaddr_in dependent_addr;
+		memset(&dependent_addr, 0, sizeof(dependent_addr));
+		
+		dependent_addr.sin_family = AF_INET;
+		dependent_addr.sin_port = htons(temp.second);
+		dependent_addr.sin_addr.s_addr = INADDR_ANY;
+		
+		char * request = new char[size_request_buffer + 1];
+		string request_str = to_string(REQUEST);
+		request_str.append(to_string(timestamp));
+		request_str.append(to_string(my_id));
+		request_str.copy(request, size_request_buffer, 0);
+		
+		sendto(sockfd, (const char *)request, strlen(request), MSG_CONFIRM, (const struct sockaddr *) &dependent_addr, sizeof(dependent_addr));
+		cout << "Sent request to port: " << temp.second << endl;
+	}
+			
 	while(1){
 		// acquire lock for array
 		array_lock.lock();
@@ -70,8 +103,7 @@ void check_and_act(){
 			queue_lock.lock();
 			
 			time(&current_time);
-			cout << current_time;
-			cout << ": critical section entry time" << endl;
+			cout << "\nCritical section entry time: " << current_time << endl;
 			
 			cout << "Entered critical section for requested generated with timestamp: " << timestamp << endl;
 			
@@ -79,8 +111,8 @@ void check_and_act(){
 				reply_received[i] = false;
 				
 			// send reply to all nodes in queue
-			while(not pending_requests.empty()){
-			
+			cout << "Is it empty: " << pending_requests.empty() << endl;
+			while(!pending_requests.empty()){
 				pair <int, struct sockaddr_in> temp = pending_requests.front();
 				pending_requests.pop();
 				string reply_str = to_string(REPLY * 10 + my_id);
@@ -88,10 +120,11 @@ void check_and_act(){
 				reply_str.copy(reply, size_reply_buffer, 0);
 				
 				sendto(sockfd, (const char *)reply, strlen(reply), MSG_CONFIRM, (const struct sockaddr *) &(temp.second), sizeof(temp.second));
+				cout << "Sent reply to port: " << temp.second.sin_port << endl;
 			}	
 			
 			time(&current_time);
-			cout << current_time << ": critical section exit time" << endl;
+			cout << "Critical section exit time: " << current_time << endl << endl;
 			cse_query_live = false;
 			
 			// release lock for queue;
@@ -101,7 +134,7 @@ void check_and_act(){
 			array_lock.unlock();
 			
 			// wait for some time
-			sleep(1);
+			sleep(sleep_time);
 			
 			// new critical section entry 
 			time(&timestamp);
@@ -123,14 +156,16 @@ void check_and_act(){
 				request_str.copy(request, size_request_buffer, 0);
 				
 				sendto(sockfd, (const char *)request, strlen(request), MSG_CONFIRM, (const struct sockaddr *) &dependent_addr, sizeof(dependent_addr));
+				cout << "Sent request to port: " << temp.second << endl;
 			}
+			
 		}
 	}
 }
 			
 void message_handler(){
 	
-	cout << "Thread message handler activated." << endl;
+	cout << "Thread message_handler activated." << endl;
 	
 	struct sockaddr_in sender_addr;
 	memset(&sender_addr, 0, sizeof(sender_addr));
@@ -139,8 +174,15 @@ void message_handler(){
 	while (true){
 		int message;
 		int n;
+		int len = sizeof(sender_addr);
 		
-		n = recvfrom(sockfd, (char *)buffer, max_message_size, MSG_WAITALL, (struct sockaddr *)&sender_addr, sizeof(sender_addr));
+		
+		n = recvfrom(sockfd, (char *)buffer, max_message_size, MSG_WAITALL, (struct sockaddr *)&sender_addr, (unsigned int*)&len);
+		string buffer_str(buffer);
+		
+		cout << "Received : " << buffer_str << endl;
+		
+		message = buffer[0] - 48;
 		
 		if (message == REQUEST){
 			
@@ -148,16 +190,31 @@ void message_handler(){
 			int foreign_id;
 			
 			// retrieve timestamp and id
+			foreign_timestamp = std::stoi(buffer_str.substr(timestamp_idx, timestamp_size));
+			foreign_id = std::stoi(buffer_str.substr(request_id_idx));
 			
+			cout << "before granting permission" << ' ' << foreign_timestamp << ' ' << timestamp << endl;
 			if (foreign_timestamp > timestamp){
 				
 				// acquire lock for queue
 				queue_lock.lock();
 				
 				//pending_requests.push(foreign_id);
+				pair<int, struct sockaddr_in> temp;
+				temp.first = foreign_id;
+				temp.second = sender_addr;
+				pending_requests.push(temp);
 				
 				// release lock for queue
 				queue_lock.unlock();
+			}
+			
+			else{
+				string reply_str = to_string(REPLY * 10 + my_id);
+				char * reply = new char[size_reply_buffer + 1];
+				reply_str.copy(reply, size_reply_buffer, 0);
+				
+				sendto(sockfd, (const char *)reply, strlen(reply), MSG_CONFIRM, (const struct sockaddr *) &(sender_addr), sizeof(sender_addr));
 			}
 		}
 		
@@ -165,6 +222,7 @@ void message_handler(){
 			
 			int foreign_id;
 			// retrieve id
+			foreign_id = std::stoi(buffer_str.substr(reply_id_idx));
 			
 			// acquire lock for array
 			array_lock.lock();
@@ -186,8 +244,10 @@ int main(int argc, char ** argv){
 		3: port number 2
 		4: port number 3
 	*/
+	
 	my_id = atoi(argv[1]);
 	port = atoi(argv[my_id + 2]);
+	sleep_time = atoi(argv[N + 4]);
 	
 	cout << "Node: " << my_id << endl;
 	
@@ -217,8 +277,8 @@ int main(int argc, char ** argv){
 	
 	cout << "Bind successful" << endl;
 	
-	thread t_message_handler(&message_handler);
 	thread t_check_and_act(&check_and_act);
+	thread t_message_handler(&message_handler);
 	
 	t_message_handler.join();
 	t_check_and_act.join();
